@@ -5,6 +5,8 @@ import CategoryTitleBefore from "discourse/components/category-title-before";
 import CdnImg from "discourse/components/cdn-img";
 import icon from "discourse/helpers/d-icon";
 import { i18n } from "discourse-i18n";
+import number  from "discourse/helpers/number";
+
 
 function hexToRgb(hex) {
   // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
@@ -23,9 +25,22 @@ function hexToRgb(hex) {
     : null;
 }
 
+function labelStyle(color) {
+  const styleString = `
+    border-left: 4px solid #${color};
+  `;
+
+  return htmlSafe(styleString.trim());
+}
+
+function elementOf(obj) {
+    return JSON.stringify(obj);
+}
+
 export default class CustomCategoryBox extends Component {
-  get hasTopics() {
-    return this.args.category.topic_count > 0;
+
+  get hasSubcategories() {
+      return (this.args.category.subcategories || []).length > 0;
   }
 
   get color() {
@@ -41,10 +56,10 @@ export default class CustomCategoryBox extends Component {
     return settings.theme_uploads[bgKey];
   }
 
-  get styleAttribute() {
+  styleAttribute() {
     const { color } = this;
 
-    if (!this.hasTopics || !color) {
+    if (!this.hasSubcategories || !color) {
       return null;
     }
 
@@ -53,23 +68,20 @@ export default class CustomCategoryBox extends Component {
     const bgUrl = this.backgroundImageUrl;
 
     const styleString = `
-      background-color: rgba(${r}, ${g}, ${b}, 0.5);
-      background-image: url(${bgUrl});
       border: 1px solid #${borderColor};
-      box-shadow: 8px 8px 0 rgba(${r}, ${g}, ${b}, 0.25);
     `;
 
     return htmlSafe(styleString.trim());
   }
 
+
   <template>
-    {{#if this.hasTopics}}
+    {{#if this.hasSubcategories }}
       <div
         class="custom-category {{if @category.isMuted '--muted'}}"
-        style={{this.styleAttribute}}
       >
-        <section>
-          <a href={{@category.url}}>
+        <section class="custom-category-section">
+          <div class="vbulletin-directory-header" href={{@category.url}}>
             {{#unless @category.isMuted}}
               {{#if @category.uploaded_logo.url}}
                 <CdnImg
@@ -87,26 +99,36 @@ export default class CustomCategoryBox extends Component {
                 {{icon "lock"}}
               {{/if}}
               {{@category.name}}
-              ({{@category.topic_count}})
             </h2>
-          </a>
+          </div>
+          <div class="vbulletin-table">
+          <div class="vbulletin-header">
+            <p>{{i18n (themePrefix "subcategory.title") }}</p>
+            <p>{{i18n "directory.topic_count"}}</p>
+            <p>{{i18n "directory.post_count"}}</p>
+          </div>
           {{#unless @category.isMuted}}
-            <div class="custom-featured-topics">
-              {{#if @category.topics}}
+            <div class="custom-subcategories">
+              {{#if @category.subcategories}}
                 <ul>
-                  {{#each @category.topics as |topic|}}
-                    <CategoriesBoxesTopic @topic={{topic}} />
+                  {{#each @category.subcategories as |sub|}}
+                    <li>
+                    <a class="subcategory-data-row" href={{sub.url}}>
+                      <div>
+                      <span class="title">{{sub.name}}</span><br/>
+                      <span class="subtitle">{{sub.description_text}}</span>
+                      </div>
+                      <span class="num">{{number sub.topic_count }}</span>
+                      <span class="num">{{number sub.post_count }}</span>
+                    </a>
+                    </li>
                   {{/each}}
                 </ul>
               {{/if}}
             </div>
           {{/unless}}
+          </div>
         </section>
-
-        <a class="custom-category-more-link" href={{@category.url}}>
-          {{i18n (themePrefix "more_topics")}}...
-        </a>
-
       </div>
     {{/if}}
   </template>

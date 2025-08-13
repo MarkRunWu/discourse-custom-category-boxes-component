@@ -5,6 +5,8 @@
 # https://translate.discourse.org/
 
 es:
+  subcategory:
+    title: "Título"
   more_topics: "Más temas..."
   theme_metadata:
     settings:

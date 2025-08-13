@@ -5,6 +5,8 @@
 # https://translate.discourse.org/
 
 zh_CN:
+  subcategory:
+    title: "标题"
   more_topics: "更多话题…"
   theme_metadata:
     settings:
